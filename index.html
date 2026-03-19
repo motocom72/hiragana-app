@@ -503,7 +503,7 @@ function playKana(char, read, cardEl, pressDuration = 0) {
   const utterance = new SpeechSynthesisUtterance(stretchedRead);
   utterance.lang = 'ja-JP';
   utterance.rate = rate;
-  utterance.pitch = 1.8;
+  utterance.pitch = 1.4;
   utterance.volume = 1.0;
 
   // 日本語音声を優先して選ぶ
