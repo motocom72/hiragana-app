@@ -1,0 +1,531 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>ひらがな れんしゅう</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@400;700&display=swap');
+
+  :root {
+    --bg: #fffef7;
+    --card-a: #ff6b6b;
+    --card-i: #ff9f43;
+    --card-u: #ffd32a;
+    --card-e: #0be881;
+    --card-o: #48dbfb;
+    --card-ka: #ff6b81;
+    --card-sa: #a29bfe;
+    --card-ta: #fd79a8;
+    --card-na: #6c5ce7;
+    --card-ha: #00b894;
+    --card-ma: #e17055;
+    --card-ya: #74b9ff;
+    --card-ra: #55efc4;
+    --card-wa: #fdcb6e;
+    --shadow: rgba(0,0,0,0.15);
+    --text-dark: #2d3436;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Kaisei Decol', serif;
+    background: var(--bg);
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* 背景の丸い装飾 */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -100px; left: -100px;
+    width: 300px; height: 300px;
+    background: radial-gradient(circle, #ffeaa7 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+  }
+  body::after {
+    content: '';
+    position: fixed;
+    bottom: -80px; right: -80px;
+    width: 250px; height: 250px;
+    background: radial-gradient(circle, #a29bfe55 0%, transparent 70%);
+    border-radius: 50%;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  header {
+    text-align: center;
+    padding: 24px 16px 12px;
+    position: relative;
+    z-index: 1;
+  }
+
+  header h1 {
+    font-size: clamp(1.6rem, 5vw, 2.4rem);
+    color: var(--text-dark);
+    letter-spacing: 0.1em;
+  }
+
+  header p {
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
+    color: #636e72;
+    margin-top: 4px;
+  }
+
+  /* 行選択タブ */
+  .row-tabs {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 16px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .tab-btn {
+    padding: 8px 16px;
+    border: 2.5px solid #dfe6e9;
+    border-radius: 24px;
+    background: white;
+    font-family: 'Kaisei Decol', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: #636e72;
+  }
+
+  .tab-btn.active {
+    background: var(--text-dark);
+    color: white;
+    border-color: var(--text-dark);
+    transform: scale(1.05);
+  }
+
+  /* グリッド */
+  .grid-container {
+    padding: 8px 12px 100px;
+    position: relative;
+    z-index: 1;
+  }
+
+  .kana-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+    gap: 12px;
+    max-width: 700px;
+    margin: 0 auto;
+  }
+
+  /* カード */
+  .kana-card {
+    aspect-ratio: 1;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: clamp(2rem, 7vw, 3rem);
+    font-weight: 700;
+    color: white;
+    cursor: pointer;
+    box-shadow: 0 4px 12px var(--shadow);
+    transition: transform 0.12s, box-shadow 0.12s;
+    user-select: none;
+    -webkit-user-select: none;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .kana-card::before {
+    content: '';
+    position: absolute;
+    top: 8px; left: 8px;
+    width: 30%;
+    height: 30%;
+    background: rgba(255,255,255,0.25);
+    border-radius: 50%;
+    filter: blur(4px);
+  }
+
+  .kana-card:active {
+    transform: scale(0.91);
+    box-shadow: 0 2px 6px var(--shadow);
+  }
+
+  .kana-card.playing {
+    animation: pop 0.35s ease;
+  }
+
+  @keyframes pop {
+    0%   { transform: scale(1); }
+    30%  { transform: scale(1.18); }
+    60%  { transform: scale(0.94); }
+    100% { transform: scale(1); }
+  }
+
+  /* 色割り当て（行ごと） */
+  .row-a    { background: linear-gradient(135deg, #ff6b6b, #ee5a24); }
+  .row-ka   { background: linear-gradient(135deg, #ff9f43, #e67e22); }
+  .row-sa   { background: linear-gradient(135deg, #ffd32a, #f9ca24); color: #5f4700 !important; }
+  .row-ta   { background: linear-gradient(135deg, #0be881, #00b894); }
+  .row-na   { background: linear-gradient(135deg, #48dbfb, #0984e3); }
+  .row-ha   { background: linear-gradient(135deg, #ff6b81, #d63031); }
+  .row-ma   { background: linear-gradient(135deg, #a29bfe, #6c5ce7); }
+  .row-ya   { background: linear-gradient(135deg, #fd79a8, #e84393); }
+  .row-ra   { background: linear-gradient(135deg, #55efc4, #00b894); color: #004d40 !important; }
+  .row-wa   { background: linear-gradient(135deg, #74b9ff, #0984e3); }
+  .row-n    { background: linear-gradient(135deg, #636e72, #2d3436); }
+
+  /* 読み上げ表示 */
+  .speech-bar {
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: white;
+    border-top: 3px solid #dfe6e9;
+    padding: 14px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    z-index: 100;
+    box-shadow: 0 -4px 20px rgba(0,0,0,0.08);
+  }
+
+  .speech-display {
+    font-size: clamp(2rem, 8vw, 3.5rem);
+    font-weight: 700;
+    color: var(--text-dark);
+    min-width: 80px;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .speech-label {
+    font-size: clamp(1rem, 3.5vw, 1.4rem);
+    color: #636e72;
+    letter-spacing: 0.05em;
+  }
+
+  .speech-wave {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    height: 40px;
+  }
+
+  .wave-bar {
+    width: 5px;
+    border-radius: 3px;
+    background: #a29bfe;
+    animation: none;
+    height: 8px;
+    transition: height 0.1s;
+  }
+
+  .wave-bar.active {
+    animation: wave 0.6s ease-in-out infinite;
+  }
+
+  .wave-bar:nth-child(2) { animation-delay: 0.1s; }
+  .wave-bar:nth-child(3) { animation-delay: 0.2s; }
+  .wave-bar:nth-child(4) { animation-delay: 0.15s; }
+  .wave-bar:nth-child(5) { animation-delay: 0.05s; }
+
+  @keyframes wave {
+    0%, 100% { height: 8px; }
+    50%       { height: 32px; }
+  }
+
+  /* 全部表示ボタン */
+  .show-all {
+    display: block;
+    margin: 0 auto 16px;
+    padding: 10px 28px;
+    background: var(--text-dark);
+    color: white;
+    border: none;
+    border-radius: 24px;
+    font-family: 'Kaisei Decol', serif;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: opacity 0.2s;
+  }
+  .show-all:hover { opacity: 0.8; }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🎵 ひらがな れんしゅう</h1>
+  <p>ボタンをおすと おとがでるよ</p>
+</header>
+
+<div class="row-tabs" id="rowTabs"></div>
+
+<div class="grid-container">
+  <button class="show-all" onclick="showAll()">ぜんぶ みる</button>
+  <div class="kana-grid" id="kanaGrid"></div>
+</div>
+
+<div class="speech-bar">
+  <div class="speech-display" id="speechDisplay">？</div>
+  <div>
+    <div class="speech-label" id="speechLabel">タッチしてね</div>
+  </div>
+  <div class="speech-wave" id="waveAnim">
+    <div class="wave-bar" id="wb1"></div>
+    <div class="wave-bar" id="wb2"></div>
+    <div class="wave-bar" id="wb3"></div>
+    <div class="wave-bar" id="wb4"></div>
+    <div class="wave-bar" id="wb5"></div>
+  </div>
+</div>
+
+<script>
+// ひらがな全リスト（行ごと）
+const rows = [
+  { label: 'あ行', key: 'a', kana: [
+    {char:'あ', read:'あ'}, {char:'い', read:'い'}, {char:'う', read:'う'}, {char:'え', read:'え'}, {char:'お', read:'お'}
+  ]},
+  { label: 'か行', key: 'ka', kana: [
+    {char:'か', read:'か'}, {char:'き', read:'き'}, {char:'く', read:'く'}, {char:'け', read:'け'}, {char:'こ', read:'こ'},
+    {char:'が', read:'が'}, {char:'ぎ', read:'ぎ'}, {char:'ぐ', read:'ぐ'}, {char:'げ', read:'げ'}, {char:'ご', read:'ご'},
+    {char:'きゃ', read:'きゃ'}, {char:'きゅ', read:'きゅ'}, {char:'きょ', read:'きょ'},
+    {char:'ぎゃ', read:'ぎゃ'}, {char:'ぎゅ', read:'ぎゅ'}, {char:'ぎょ', read:'ぎょ'},
+  ]},
+  { label: 'さ行', key: 'sa', kana: [
+    {char:'さ', read:'さ'}, {char:'し', read:'し'}, {char:'す', read:'す'}, {char:'せ', read:'せ'}, {char:'そ', read:'そ'},
+    {char:'ざ', read:'ざ'}, {char:'じ', read:'じ'}, {char:'ず', read:'ず'}, {char:'ぜ', read:'ぜ'}, {char:'ぞ', read:'ぞ'},
+    {char:'しゃ', read:'しゃ'}, {char:'しゅ', read:'しゅ'}, {char:'しょ', read:'しょ'},
+    {char:'じゃ', read:'じゃ'}, {char:'じゅ', read:'じゅ'}, {char:'じょ', read:'じょ'},
+  ]},
+  { label: 'た行', key: 'ta', kana: [
+    {char:'た', read:'た'}, {char:'ち', read:'ち'}, {char:'つ', read:'つ'}, {char:'て', read:'て'}, {char:'と', read:'と'},
+    {char:'だ', read:'だ'}, {char:'ぢ', read:'ぢ'}, {char:'づ', read:'づ'}, {char:'で', read:'で'}, {char:'ど', read:'ど'},
+    {char:'ちゃ', read:'ちゃ'}, {char:'ちゅ', read:'ちゅ'}, {char:'ちょ', read:'ちょ'},
+  ]},
+  { label: 'な行', key: 'na', kana: [
+    {char:'な', read:'な'}, {char:'に', read:'に'}, {char:'ぬ', read:'ぬ'}, {char:'ね', read:'ね'}, {char:'の', read:'の'},
+    {char:'にゃ', read:'にゃ'}, {char:'にゅ', read:'にゅ'}, {char:'にょ', read:'にょ'},
+  ]},
+  { label: 'は行', key: 'ha', kana: [
+    {char:'は', read:'は'}, {char:'ひ', read:'ひ'}, {char:'ふ', read:'ふ'}, {char:'へ', read:'へ'}, {char:'ほ', read:'ほ'},
+    {char:'ば', read:'ば'}, {char:'び', read:'び'}, {char:'ぶ', read:'ぶ'}, {char:'べ', read:'べ'}, {char:'ぼ', read:'ぼ'},
+    {char:'ぱ', read:'ぱ'}, {char:'ぴ', read:'ぴ'}, {char:'ぷ', read:'ぷ'}, {char:'ぺ', read:'ぺ'}, {char:'ぽ', read:'ぽ'},
+    {char:'ひゃ', read:'ひゃ'}, {char:'ひゅ', read:'ひゅ'}, {char:'ひょ', read:'ひょ'},
+    {char:'びゃ', read:'びゃ'}, {char:'びゅ', read:'びゅ'}, {char:'びょ', read:'びょ'},
+    {char:'ぴゃ', read:'ぴゃ'}, {char:'ぴゅ', read:'ぴゅ'}, {char:'ぴょ', read:'ぴょ'},
+  ]},
+  { label: 'ま行', key: 'ma', kana: [
+    {char:'ま', read:'ま'}, {char:'み', read:'み'}, {char:'む', read:'む'}, {char:'め', read:'め'}, {char:'も', read:'も'},
+    {char:'みゃ', read:'みゃ'}, {char:'みゅ', read:'みゅ'}, {char:'みょ', read:'みょ'},
+  ]},
+  { label: 'や行', key: 'ya', kana: [
+    {char:'や', read:'や'}, {char:'ゆ', read:'ゆ'}, {char:'よ', read:'よ'},
+  ]},
+  { label: 'ら行', key: 'ra', kana: [
+    {char:'ら', read:'ら'}, {char:'り', read:'り'}, {char:'る', read:'る'}, {char:'れ', read:'れ'}, {char:'ろ', read:'ろ'},
+    {char:'りゃ', read:'りゃ'}, {char:'りゅ', read:'りゅ'}, {char:'りょ', read:'りょ'},
+  ]},
+  { label: 'わ行', key: 'wa', kana: [
+    {char:'わ', read:'わ'}, {char:'を', read:'を'}, {char:'ん', read:'ん'},
+  ]},
+];
+
+let currentRow = null;
+let synth = window.speechSynthesis;
+let speaking = false;
+
+// タブ生成
+const tabsEl = document.getElementById('rowTabs');
+rows.forEach(row => {
+  const btn = document.createElement('button');
+  btn.className = 'tab-btn';
+  btn.textContent = row.label;
+  btn.dataset.key = row.key;
+  btn.onclick = () => filterRow(row.key, btn);
+  tabsEl.appendChild(btn);
+});
+
+function filterRow(key, btn) {
+  // 既にアクティブなら全表示に戻す
+  if (currentRow === key) {
+    currentRow = null;
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    renderGrid(rows.flatMap(r => r.kana.map(k => ({...k, rowKey: r.key}))));
+    return;
+  }
+  currentRow = key;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  const row = rows.find(r => r.key === key);
+  renderGrid(row.kana.map(k => ({...k, rowKey: key})));
+}
+
+function showAll() {
+  currentRow = null;
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  renderGrid(rows.flatMap(r => r.kana.map(k => ({...k, rowKey: r.key}))));
+}
+
+function renderGrid(kanaList) {
+  const grid = document.getElementById('kanaGrid');
+  grid.innerHTML = '';
+  kanaList.forEach(item => {
+    const card = document.createElement('div');
+    card.className = `kana-card row-${item.rowKey}`;
+    card.textContent = item.char;
+    attachPressHandlers(card, item.char, item.read);
+    grid.appendChild(card);
+  });
+}
+
+// ---- 長押し検出 ----
+// 押した瞬間から時間を計り、離したときに長さを決める
+// 短押し（<300ms）: 普通に1回
+// 300ms〜: 長押し時間に応じて母音を伸ばして読み上げ
+//   ・読みの最後の文字（母音相当）をN回繰り返す
+//   ・rateも遅くする
+// 長押し中はカードが少し拡大するビジュアルフィードバックあり
+
+function attachPressHandlers(card, char, read) {
+  let pressStart = null;
+  let holdTimer = null;
+  let pressing = false;
+
+  function onDown(e) {
+    e.preventDefault();
+    pressStart = Date.now();
+    pressing = true;
+    card.style.transform = 'scale(0.95)';
+    // 300ms後から拡大アニメで「長押し中」を表示
+    holdTimer = setTimeout(() => {
+      if (pressing) card.style.transform = 'scale(1.08)';
+    }, 300);
+  }
+
+  function onUp(e) {
+    e.preventDefault();
+    if (!pressing) return;
+    pressing = false;
+    clearTimeout(holdTimer);
+    card.style.transform = '';
+
+    const duration = Date.now() - pressStart;
+    playKana(char, read, card, duration);
+  }
+
+  function onLeave(e) {
+    if (pressing) onUp(e);
+  }
+
+  card.addEventListener('touchstart', onDown, { passive: false });
+  card.addEventListener('touchend',   onUp,   { passive: false });
+  card.addEventListener('mousedown',  onDown);
+  card.addEventListener('mouseup',    onUp);
+  card.addEventListener('mouseleave', onLeave);
+}
+
+// ひらがな → 母音ひらがな のマッピング
+// 「す」→「う」、「しゃ」→「あ」のように末尾の母音を返す
+const vowelMap = {
+  'あ':'あ','い':'い','う':'う','え':'え','お':'お',
+  'か':'あ','き':'い','く':'う','け':'え','こ':'お',
+  'が':'あ','ぎ':'い','ぐ':'う','げ':'え','ご':'お',
+  'さ':'あ','し':'い','す':'う','せ':'え','そ':'お',
+  'ざ':'あ','じ':'い','ず':'う','ぜ':'え','ぞ':'お',
+  'た':'あ','ち':'い','つ':'う','て':'え','と':'お',
+  'だ':'あ','ぢ':'い','づ':'う','で':'え','ど':'お',
+  'な':'あ','に':'い','ぬ':'う','ね':'え','の':'お',
+  'は':'あ','ひ':'い','ふ':'う','へ':'え','ほ':'お',
+  'ば':'あ','び':'い','ぶ':'う','べ':'え','ぼ':'お',
+  'ぱ':'あ','ぴ':'い','ぷ':'う','ぺ':'え','ぽ':'お',
+  'ま':'あ','み':'い','む':'う','め':'え','も':'お',
+  'や':'あ','ゆ':'う','よ':'お',
+  'ら':'あ','り':'い','る':'う','れ':'え','ろ':'お',
+  'わ':'あ','を':'お','ん':'ん',
+  // 拗音：末尾の小文字で母音が決まる
+  'きゃ':'あ','きゅ':'う','きょ':'お',
+  'ぎゃ':'あ','ぎゅ':'う','ぎょ':'お',
+  'しゃ':'あ','しゅ':'う','しょ':'お',
+  'じゃ':'あ','じゅ':'う','じょ':'お',
+  'ちゃ':'あ','ちゅ':'う','ちょ':'お',
+  'にゃ':'あ','にゅ':'う','にょ':'お',
+  'ひゃ':'あ','ひゅ':'う','ひょ':'お',
+  'びゃ':'あ','びゅ':'う','びょ':'お',
+  'ぴゃ':'あ','ぴゅ':'う','ぴょ':'お',
+  'みゃ':'あ','みゅ':'う','みょ':'お',
+  'りゃ':'あ','りゅ':'う','りょ':'お',
+};
+
+// 読み + 繰り返し回数 → 伸ばした文字列
+// 例: read='す', n=4 → 'すううう'
+// 例: read='しゃ', n=3 → 'しゃああ'
+function makeStretch(read, n) {
+  if (n <= 1) return read;
+  const vowel = vowelMap[read] || [...read].pop();
+  return read + vowel.repeat(n - 1);
+}
+
+function playKana(char, read, cardEl, pressDuration = 0) {
+  // 長押し量 → 繰り返し回数とrate計算
+  // 300ms以下 = 普通, 最大3000msで最大8回繰り返し
+  const extra = Math.max(0, pressDuration - 300);
+  const repeatCount = 1 + Math.floor(extra / 280); // 280msごとに1回追加
+  const capped = Math.min(repeatCount, 9);
+  const stretchedRead = makeStretch(read, capped);
+
+  // 長いほどrateを下げる（0.85 → 最低0.45）
+  const rate = Math.max(0.45, 0.85 - (capped - 1) * 0.05);
+
+  // カードアニメ
+  cardEl.classList.remove('playing');
+  void cardEl.offsetWidth;
+  cardEl.classList.add('playing');
+  setTimeout(() => cardEl.classList.remove('playing'), 400);
+
+  // 表示更新
+  document.getElementById('speechDisplay').textContent = char;
+  const longMark = capped > 1 ? '〜'.repeat(Math.min(capped - 1, 4)) : '！';
+  document.getElementById('speechLabel').textContent = read + longMark;
+
+  // 波形アニメ
+  const bars = document.querySelectorAll('.wave-bar');
+  bars.forEach(b => b.classList.add('active'));
+
+  // 音声合成
+  if (synth.speaking) synth.cancel();
+  const utterance = new SpeechSynthesisUtterance(stretchedRead);
+  utterance.lang = 'ja-JP';
+  utterance.rate = rate;
+  utterance.pitch = 1.8;
+  utterance.volume = 1.0;
+
+  // 日本語音声を優先して選ぶ
+  const voices = synth.getVoices();
+  const jaVoice = voices.find(v => v.lang === 'ja-JP') || voices.find(v => v.lang.startsWith('ja'));
+  if (jaVoice) utterance.voice = jaVoice;
+
+  utterance.onend = () => {
+    bars.forEach(b => b.classList.remove('active'));
+    document.getElementById('speechLabel').textContent = read + '！';
+  };
+
+  synth.speak(utterance);
+}
+
+// 初期表示（全部）
+renderGrid(rows.flatMap(r => r.kana.map(k => ({...k, rowKey: r.key}))));
+
+// voicesロード待ち（Chrome対策）
+if (speechSynthesis.onvoiceschanged !== undefined) {
+  speechSynthesis.onvoiceschanged = () => {};
+}
+</script>
+</body>
+</html>
