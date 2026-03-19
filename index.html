@@ -500,7 +500,8 @@ function playKana(char, read, cardEl, pressDuration = 0) {
 
   // 音声合成
   if (synth.speaking) synth.cancel();
-　const utterance = new SpeechSynthesisUtterance('ー' + stretchedRead);
+　const utterance = new SpeechSynthesisUtterance(stretchedRead);
+
   utterance.lang = 'ja-JP';
   utterance.rate = rate;
   utterance.pitch = 1.0;
