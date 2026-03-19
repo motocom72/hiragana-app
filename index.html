@@ -481,7 +481,7 @@ function playKana(char, read, cardEl, pressDuration = 0) {
   const stretchedRead = makeStretch(read, capped);
 
   // 長いほどrateを下げる（0.85 → 最低0.45）
-  const rate = Math.max(0.45, 0.85 - (capped - 1) * 0.05);
+  const rate = Math.max(0.7, 0.95 - (capped - 1) * 0.05);
 
   // カードアニメ
   cardEl.classList.remove('playing');
@@ -503,7 +503,7 @@ function playKana(char, read, cardEl, pressDuration = 0) {
   const utterance = new SpeechSynthesisUtterance(stretchedRead);
   utterance.lang = 'ja-JP';
   utterance.rate = rate;
-  utterance.pitch = 1.4;
+  utterance.pitch = 1.0;
   utterance.volume = 1.0;
 
   // 日本語音声を優先して選ぶ
